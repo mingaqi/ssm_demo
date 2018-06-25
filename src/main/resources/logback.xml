@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+	<!-- 日志存储根路径 -->
+	<property name="log.dir.root" value="/Users/wangmingming/IDE/logs/ssm_demo" />
+	<!-- 区分不同应用程序的记录，默认为default -->
+	 <!--<contextName>ssm_demo</contextName>-->
+	
+	<!-- 控制台输出日志 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder charset="utf-8"> <!-- encoder 可以指定字符集，对于中文输出有意义 -->
+			<!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+		</encoder>
+
+	</appender>
+
+	<!-- 访问日志 appender -->
+	<appender name="ACCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- 按天回滚 daily -->
+			<fileNamePattern>${log.dir.root}/access/sys-access-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<!-- 日志最大的历史 60天 -->
+			<!--<maxHistory>60</maxHistory>-->
+
+			<!--按照大小分割日志文件-->
+			<timeBasedFileNamingAndTriggeringPolicy
+					class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>700MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<!--按照大小分割日志文件-->
+
+		</rollingPolicy>
+
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 出错日志 appender -->
+	<appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- 按天回滚 daily -->
+			<fileNamePattern>${log.dir.root}/error/sys-error-%d{yyyy-MM-dd}.log</fileNamePattern>
+			<!-- 日志最大的历史 60天 -->
+			<maxHistory>60</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 下面配置一些第三方包的日志过滤级别 -->
+	<logger name="com.domi" level="DEBUG" additivity="true"/>
+	<!--<logger name="net.sf.ehcache" level="WARN" />-->
+	<logger name="org.springframework.web" level="WARN" />
+	<logger name="org.mybatis" level="info" />
+
+
+    <root level="debug">
+        <!--
+        <appender-ref ref="ACCESS" />
+         -->
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="ACCESS" />
+	</root>
+	
+	<!--错误日志 -->
+	<logger name="sys-error" level="info">
+		<appender-ref ref="ERROR" />
+	</logger>
+
+	<!--访问日志 -->
+	<logger name="sys-access" level="info">
+		<appender-ref ref="ACCESS" />
+	</logger>
+</configuration>    

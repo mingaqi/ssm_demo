@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd"
+       default-lazy-init="false">
+
+    <!-- 声明式事务管理 -->
+    <!--https://blog.csdn.net/daijin888888/article/details/51822257-->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <!--
+            DEFAULT         使用后端数据库默认的隔离级别（Spring中的选择项）
+            READ_UNCOMMITED 允许你读取还未提交的改变了的数据。可能导致脏、幻、不可重复读
+            READ_COMMITTED  允许在并发事务已经提交后读取。可防止脏读，但幻读和不可重复读仍可发生
+            REPEATABLE_READ 对相同字段的多次读取是一致的，除非数据被事务本身改变。可防止脏、不可重复读，但幻读仍可能发生
+            SERIALIZABLE    完全服从ACID的隔离级别，确保不发生脏、幻、不可重复读。这在所有的隔离级别中是最慢的，它是典型的通过完全锁定在事务中涉及的数据表来完成的
+        -->
+        <!--
+            propagation :       事务传播行为
+            isolation   :       事务的隔离级别
+            read-only   :       只读
+            rollback-for:       发生哪些异常回滚
+            no-rollback-for :   发生哪些异常不回滚
+            timeout     :       过期信息
+
+            @Transactional中的的属性:
+            propagation :事务的传播行为
+            isolation   :事务的隔离级别
+            readOnly    :只读
+            rollbackFor :发生哪些异常回滚 noRollbackFor :发生哪些异常不回滚
+            rollbackForClassName: 根据异常类名回滚
+        -->
+             
+        <tx:attributes>
+            <tx:method name="insert*" propagation="REQUIRED" read-only="false"
+                       isolation="READ_COMMITTED" rollback-for="java.lang.Exception" />
+            <tx:method name="save*" propagation="REQUIRED" read-only="false"
+                       isolation="READ_COMMITTED" rollback-for="java.lang.Exception" />
+            <tx:method name="add*" propagation="REQUIRED" read-only="false"
+                       isolation="READ_COMMITTED" rollback-for="java.lang.Exception" />
+            <tx:method name="update*" propagation="REQUIRED" read-only="false"
+                       isolation="READ_COMMITTED" rollback-for="java.lang.Exception" />
+            <tx:method name="delete*" propagation="REQUIRED" read-only="false"
+                       isolation="READ_COMMITTED" rollback-for="java.lang.Exception" />
+            <tx:method name="remove*" propagation="REQUIRED" read-only="false"
+                       isolation="READ_COMMITTED" rollback-for="java.lang.Exception" />
+            <!-- <tx:method name="*" read-only="true" rollback-for="java.lang.Exception" /> -->
+        </tx:attributes>
+    </tx:advice>
+    <!--expose-proxy="true" 防止AOP无法切入同类调用方法-->
+    <aop:config expose-proxy="true" proxy-target-class="true">
+        <aop:pointcut id="pc" expression="execution(* com..service.*.*(..))" />
+        <aop:advisor pointcut-ref="pc" advice-ref="txAdvice" />
+    </aop:config>
+
+    <!--proxy-target-class="true" 基于接口的代理和基于类的代理有关-->
+    <tx:annotation-driven proxy-target-class="true" transaction-manager="transactionManager"/>
+
+</beans>
